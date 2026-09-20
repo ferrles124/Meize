@@ -3,14 +3,12 @@ name: Unpack XNB
 on:
   workflow_dispatch:
   push:
-    branches: [main]
     paths:
-      - '**/*.xnb'
-      - '.github/workflows/build.yml'
+      - '**.xnb'
 
 jobs:
   unpack:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
       - name: Checkout repo
@@ -19,7 +17,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '14'
 
       - name: Clone xnbcli
         run: git clone https://github.com/LeonBlade/xnbcli.git xnbcli-tool
@@ -32,14 +30,7 @@ jobs:
       - name: Prepare packed folder
         run: |
           mkdir -p xnbcli-tool/packed
-          find . -type f -iname "*.xnb" -exec cp {} xnbcli-tool/packed/ \;
-
-      - name: Check if XNB files exist
-        run: |
-          if [ -z "$(find xnbcli-tool/packed -maxdepth 1 -type f -iname '*.xnb' -print -quit)" ]; then
-            echo "No .xnb files found. Exiting."
-            exit 1
-          fi
+          find . -maxdepth 3 -iname "*.xnb" -exec cp {} xnbcli-tool/packed/ \;
 
       - name: Unpack XNB files
         run: |
