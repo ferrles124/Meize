@@ -59,8 +59,7 @@ jobs:
       - name: Build ToasterMapCLI
         run: |
           cd toaster-tool
-          dotnet build -c Release -r linux-x64 --self-contained false
-
+          dotnet build ToasterMapCLI.csproj -c Release -r linux-x64 --self-contained false
       - name: Inspect ToasterMapCLI usage
         run: |
           find toaster-tool -iname "ToasterMapCLI.dll" -path "*linux-x64*"
