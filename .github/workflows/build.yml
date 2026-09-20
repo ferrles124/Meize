@@ -3,12 +3,15 @@ name: Unpack XNB
 on:
   workflow_dispatch:
   push:
+    branches: [main]
     paths:
-      - '**.xnb'
+      - '**/*.xnb'
+      - '.github/workflows/build.yml'
 
 jobs:
   unpack:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -29,7 +32,14 @@ jobs:
       - name: Prepare packed folder
         run: |
           mkdir -p xnbcli-tool/packed
-          find . -maxdepth 3 -iname "*.xnb" -exec cp {} xnbcli-tool/packed/ \;
+          find . -type f -iname "*.xnb" -exec cp {} xnbcli-tool/packed/ \;
+
+      - name: Check if XNB files exist
+        run: |
+          if [ -z "$(find xnbcli-tool/packed -maxdepth 1 -type f -iname '*.xnb' -print -quit)" ]; then
+            echo "No .xnb files found. Exiting."
+            exit 1
+          fi
 
       - name: Unpack XNB files
         run: |
