@@ -43,15 +43,26 @@ jobs:
       - name: Clone ToasterMapCLI
         run: git clone https://github.com/ToasterSDV/ToasterMapCLI.git toaster-tool
 
+      - name: Fetch game DLLs from GiftMail repo
+        run: |
+          git clone --depth 1 https://github.com/ferrles124/GiftMail.git giftmail-libs
+          find giftmail-libs -iname "*.dll"
+          cp giftmail-libs/**/xTile.dll toaster-tool/ 2>/dev/null || find giftmail-libs -iname "xTile.dll" -exec cp {} toaster-tool/ \;
+          find giftmail-libs -iname "MonoGame.Framework.dll" -exec cp {} toaster-tool/ \;
+
+      - name: Add DLL references to csproj
+        run: |
+          cd toaster-tool
+          sed -i 's|</Project>|  <ItemGroup>\n    <Reference Include="xTile"><HintPath>xTile.dll</HintPath></Reference>\n    <Reference Include="MonoGame.Framework"><HintPath>MonoGame.Framework.dll</HintPath></Reference>\n  </ItemGroup>\n</Project>|' ToasterMapCLI.csproj
+          cat ToasterMapCLI.csproj
+
       - name: Build ToasterMapCLI
         run: |
           cd toaster-tool
           dotnet build -c Release
 
-      - name: Inspect ToasterMapCLI usage
-        run: |
-          find toaster-tool -iname "*.dll" -path "*Release*"
-          find toaster-tool -iname "*.dll" -path "*Release*" -exec dotnet {} \; || true
+      - name: Find built CLI
+        run: find toaster-tool -iname "*.dll" -path "*bin*Release*"
 
       - name: Upload unpacked result
         uses: actions/upload-artifact@v4
