@@ -3,13 +3,10 @@ name: Unpack XNB
 on:
   workflow_dispatch:
   push:
-    paths:
-      - '**/*.xnb'
 
 jobs:
   unpack:
     runs-on: ubuntu-20.04
-    timeout-minutes: 15
 
     steps:
       - name: Checkout repo
@@ -18,20 +15,15 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '14.21.3'
-          check-latest: false
-
-      - name: Verify Node.js version
-        run: |
-          node --version
-          npm --version
+          node-version: '14'
 
       - name: Clone xnbcli
         run: git clone https://github.com/LeonBlade/xnbcli.git xnbcli-tool
 
       - name: Install xnbcli dependencies
-        working-directory: xnbcli-tool
-        run: npm install --no-fund --no-audit
+        run: |
+          cd xnbcli-tool
+          npm install
 
       - name: Prepare packed folder
         run: |
@@ -39,8 +31,9 @@ jobs:
           find . -maxdepth 3 -iname "*.xnb" -exec cp {} xnbcli-tool/packed/ \;
 
       - name: Unpack XNB files
-        working-directory: xnbcli-tool
-        run: node xnbcli unpack packed unpacked
+        run: |
+          cd xnbcli-tool
+          node xnbcli unpack packed unpacked
 
       - name: Upload unpacked result
         uses: actions/upload-artifact@v4
