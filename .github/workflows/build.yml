@@ -17,6 +17,11 @@ jobs:
         with:
           node-version: '14'
 
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
       - name: Clone xnbcli
         run: git clone https://github.com/LeonBlade/xnbcli.git xnbcli-tool
 
@@ -34,6 +39,19 @@ jobs:
         run: |
           cd xnbcli-tool
           node xnbcli unpack packed unpacked
+
+      - name: Clone ToasterMapCLI
+        run: git clone https://github.com/ToasterSDV/ToasterMapCLI.git toaster-tool
+
+      - name: Build ToasterMapCLI
+        run: |
+          cd toaster-tool
+          dotnet build -c Release
+
+      - name: Inspect ToasterMapCLI usage
+        run: |
+          find toaster-tool -iname "*.dll" -path "*Release*"
+          find toaster-tool -iname "*.dll" -path "*Release*" -exec dotnet {} \; || true
 
       - name: Upload unpacked result
         uses: actions/upload-artifact@v4
