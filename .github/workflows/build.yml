@@ -62,11 +62,9 @@ jobs:
           dotnet build ToasterMapCLI.csproj -c Release -r linux-x64 --self-contained false
       - name: Inspect ToasterMapCLI usage
         run: |
-          find toaster-tool -iname "ToasterMapCLI.dll" -path "*linux-x64*"
-          DLLPATH=$(find toaster-tool -iname "ToasterMapCLI.dll" -path "*linux-x64*" | head -n 1)
+          DLLPATH=$(find toaster-tool -iname "ToasterMapCLI.dll" -path "*bin*linux-x64*" | head -n 1)
           echo "Using: $DLLPATH"
-          dotnet "$DLLPATH" || true
-
+          DOTNET_ROLL_FORWARD=LatestMajor dotnet "$DLLPATH" || true
       - name: Upload unpacked result
         uses: actions/upload-artifact@v4
         with:
