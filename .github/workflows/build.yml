@@ -47,7 +47,7 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/ferrles124/GiftMail.git giftmail-libs
           find giftmail-libs -iname "*.dll"
-          cp giftmail-libs/**/xTile.dll toaster-tool/ 2>/dev/null || find giftmail-libs -iname "xTile.dll" -exec cp {} toaster-tool/ \;
+          find giftmail-libs -iname "xTile.dll" -exec cp {} toaster-tool/ \;
           find giftmail-libs -iname "MonoGame.Framework.dll" -exec cp {} toaster-tool/ \;
 
       - name: Add DLL references to csproj
