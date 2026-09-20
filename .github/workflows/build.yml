@@ -46,7 +46,6 @@ jobs:
       - name: Fetch game DLLs from GiftMail repo
         run: |
           git clone --depth 1 https://github.com/ferrles124/GiftMail.git giftmail-libs
-          find giftmail-libs -iname "*.dll"
           find giftmail-libs -iname "xTile.dll" -exec cp {} toaster-tool/ \;
           find giftmail-libs -iname "MonoGame.Framework.dll" -exec cp {} toaster-tool/ \;
 
@@ -54,19 +53,29 @@ jobs:
         run: |
           cd toaster-tool
           sed -i 's|</Project>|  <ItemGroup>\n    <Reference Include="xTile"><HintPath>xTile.dll</HintPath></Reference>\n    <Reference Include="MonoGame.Framework"><HintPath>MonoGame.Framework.dll</HintPath></Reference>\n  </ItemGroup>\n</Project>|' ToasterMapCLI.csproj
-          cat ToasterMapCLI.csproj
 
       - name: Build ToasterMapCLI
         run: |
           cd toaster-tool
           dotnet build ToasterMapCLI.csproj -c Release -r linux-x64 --self-contained false
-      - name: Inspect ToasterMapCLI usage
+
+      - name: Convert tbin to tmx
         run: |
           DLLPATH=$(find toaster-tool -iname "ToasterMapCLI.dll" -path "*bin*linux-x64*" | head -n 1)
-          echo "Using: $DLLPATH"
-          DOTNET_ROLL_FORWARD=LatestMajor dotnet "$DLLPATH" || true
-      - name: Upload unpacked result
+          OUTDIR=$(dirname "$DLLPATH")
+          cp toaster-tool/xTile.dll "$OUTDIR/"
+          cp toaster-tool/MonoGame.Framework.dll "$OUTDIR/"
+          mkdir -p converted
+          TBIN=$(find xnbcli-tool/unpacked -iname "*.tbin" | head -n 1)
+          echo "Converting: $TBIN"
+          DOTNET_ROLL_FORWARD=LatestMajor dotnet "$DLLPATH" "$TBIN" "converted/$(basename "${TBIN%.tbin}.tmx")" || true
+          echo "---- converted folder ----"
+          find converted -type f
+
+      - name: Upload result
         uses: actions/upload-artifact@v4
         with:
-          name: unpacked-maps
-          path: xnbcli-tool/unpacked/
+          name: converted-maps
+          path: |
+            xnbcli-tool/unpacked/
+            converted/
